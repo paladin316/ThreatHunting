@@ -22,8 +22,11 @@ Splunk queries are designed to score LOLBINs activity using a scoring method tha
 
 Base score + Each MITRE Technique Score = Overal Score
 1  = (Low) LOLBINs activity that is frequent in the your environment and may be used by some of your Server and Workdstation Support Teams
+
 4  = (Med) LOLBINs activity that is less frequent in the your environment and may be used by some of your Server and Workdstation Support Teams
+
 7  = (High) LOLBINs activity is not frequent in the your environment and may be used by some of your Server and Workdstation Support Teams
+
 10 = (Critical) LOLBINs activity should never be seen in the your environment and is not used by your Server and Workdstation Support Teams
 
 

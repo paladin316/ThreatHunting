@@ -24,13 +24,13 @@ The primary goal here is to identify areas where security products can't alert o
 
 Base score + Each MITRE Technique Score = Overal Score
 
-1  = (Low) LOLBINs activity that is frequent in the your environment and may be used by some of your Server and Workdstation Support Teams
+1  = (Low) LOLBINs activity that is frequent in your environment and may be used by some of your Server and Workdstation Support Teams
 
-4  = (Med) LOLBINs activity that is less frequent in the your environment and may be used by some of your Server and Workdstation Support Teams
+4  = (Med) LOLBINs activity that is less frequent in your environment and may be used by some of your Server and Workdstation Support Teams
 
-7  = (High) LOLBINs activity is not frequent in the your environment and may be used by some of your Server and Workdstation Support Teams
+7  = (High) LOLBINs activity is not frequent in your environment and may be used by some of your Server and Workdstation Support Teams
 
-10 = (Critical) LOLBINs activity should never be seen in the your environment and is not used by your Server and Workdstation Support Teams
+10 = (Critical) LOLBINs activity should never be seen in your environment and is not used by your Server and Workdstation Support Teams
 
 
 **Scoring Model with Threat Count:**

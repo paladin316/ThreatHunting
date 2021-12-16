@@ -17,6 +17,8 @@ Before going into what the files are, I will describe my lab setup:
 
 Splunk queries are designed to score LOLBINs activity using a scoring method that bubbles up the most egregious activity to the top of the list based on MITRE techniques. The Scoring model uses four numbers to represent the level of seriousness of the activity seen. The sum of all of the activity is added together to create a total score for each of the MITRE techniques, then added together to create an overall score for each system. Before implementing the scoring system its a good idea is to perform some frequency analysis on LOLBINs usage within your environment. Build out the scoring model according to what you know about your environment (Priciple: Know You Environment). This scoring model will be unique to your environment since no two companies are the same. 
 
+The primary goal here is to identify areas where security products can't alert on due to the high rate of false positive. Basically searching between data elements to pick up on malicious behaviors.
+
 
 **Scoring Model (Base):**
 

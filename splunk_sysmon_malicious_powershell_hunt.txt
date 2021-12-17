@@ -1,0 +1,16 @@
+source=WinEventLog:Microsoft-Windows-Sysmon/Operational AND Image=*powershell.exe AND CommandLine!=" " 
+| eval Date=strftime(_time, "%Y/%m/%d %H:%M:%S:%f")
+| stats values(ComputerName) AS Computers values(User) AS User values(IntegrityLevel) AS IntegrityLevel values(OriginalFileName) AS OriginalFileName values(Image) AS ImageFileName values(CommandLine) AS CommandLine values(ParentImage) As ParentImage values(ParentCommandLine) AS ParentCommandLine dc(CommandLine) AS ThreatCount by Image,ComputerName
+| eval Commands = lower(CommandLine)
+| rex field=Commands mode=sed "s/\"//g"
+| rex field=Commands mode=sed "s/\'//g"
+| eval T1086_PwrShell_InvokeWebRequest=if(match((Commands),"(?i).*(iwr|urihttp|downloadstring|webrequest).*"),10,0)
+| eval T1086_PwrShell_Base64=if(match(lower(Commands),".*(frombase64string|encodedcommand|encode|decode).*"),7,0)
+| eval T1086_PwrShell_Exec=if(match(lower(Commands),".*(executionpolicy|command|exec|noprofile|bypass|iex|invoke|set|remove|start|get|nop|noninteractive|windowstyle|hidden|remotesigned|$env|restricted).*"),10,0)
+| eval T1086_PwrShell_WriteHost=if(match(lower(Commands),".*(write-host|outfile).*"),7,0)
+| eval T1086_PwrShell_NewObject=if(match(lower(Commands),".*(new-object|new-item|new|cmd).*"),10,0)
+| eval Execution_c= 'T1086_PwrShell_InvokeWebRequest'+'T1086_PwrShell_Base64'+'T1086_PwrShell_Exec'+'T1086_PwrShell_WriteHost'+'T1086_PwrShell_NewObject'
+| eval  Execution=Execution_c*ThreatCount
+| addtotals fieldname=Score Execution
+| table Computers User IntegrityLevel Score Execution T1086_PwrShell_InvokeWebRequest T1086_PwrShell_Base64 T1086_PwrShell_Exec T1086_PwrShell_WriteHost T1086_PwrShell_NewObject Original_FileName ImageFileName Commands ParentImage ParentCommandLine
+| sort Score desc

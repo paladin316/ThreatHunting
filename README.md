@@ -88,5 +88,13 @@ Base score + Each MITRE Technique Score X The number of occurences for each even
    ![image](https://user-images.githubusercontent.com/15706462/146422780-0dfd0833-bbab-4726-9627-cba696dc86e5.png)
    [Example_Data-splunk_sysmon_lolbins_hunt_with_threat-count_renamed_binaries.csv](https://github.com/paladin316/ThreatHunting/files/7729429/Example_Data-splunk_sysmon_lolbins_hunt_with_threat-count_renamed_binaries.csv)
 
+6. **Filename**: splunk_sysmon_malicious_powershell_hunt.txt
+   
+   **Description**: Splunk query designed to identify malicious PowerShell activity
+   
+   Examples:
+   ![image](https://user-images.githubusercontent.com/15706462/146610200-d10a94b0-c59b-4ecd-be85-9ee2693b593e.png).csv)
+   [Example_Data-splunk_sysmon_malicious_powershell_hunt.csv](https://github.com/paladin316/ThreatHunting/files/7737856/Example_Data-splunk_sysmon_malicious_powershell_hunt.csv)
+
 
 

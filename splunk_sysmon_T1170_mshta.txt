@@ -1,0 +1,18 @@
+host=* "mshta" 
+| eval Date=strftime(_time, "%Y/%m/%d %H:%M:%S:%f")
+| stats values(ComputerName) AS Computers values(User) AS User values(IntegrityLevel) AS IntegrityLevel values(OriginalFileName) AS OriginalFileName  values(Image) AS ImageFileName values(CommandLine) AS CommandLine values(ParentImage) As ParentImage values(ParentCommandLine) AS ParentCommandLine dc(CommandLine) AS ThreatCount by Image,ComputerName
+| eval Commands = lower(CommandLine)
+| rex field=Commands mode=sed "s/\"//g"
+| eval T1170_mshta=if(match((Commands),"(?i).*mshta.*\.hta|.*mshta.*vbscript.*|.*mshta.*javascript.*|.*mshta.*\w{1}:\\.*\w{3}:.*\w{3}"),7,0) 
+| eval T1170_createobject=if(match((Commands),"(?i).*createobject.*"),10,0)
+| eval T1170_shell=if(match((Commands),"(?i).*shell.*"),10,0) 
+| eval T1170_run=if(match((Commands),"(?i).*run.*"),10,0)
+| eval T1170_getobject=if(match((Commands),"(?i).*getobject.*"),10,0)
+| eval T1170_javascript=if(match((Commands),"(?i).*javascript.*"),10,0)
+| eval T1170_vbscript=if(match((Commands),"(?i).*vbscript.*"),10,0)
+| eval T1170_http=if(match((Commands),"(?i).*http.*"),10,0)
+| eval Defense_Evasion_c= 'T1170_mshta'+'T1170_createobject'+'T1170_shell'+'T1170_run'+'T1170_getobject'+'T1170_javascript'+'T1170_vbscript'+'T1170_http'
+| eval  Defense_Evasion=Defense_Evasion_c*ThreatCount
+| addtotals fieldname=Score Defense_Evasion
+| table Computers User IntegrityLevel Score Defense_Evasion T1170_mshta T1170_createobject T1170_shell T1170_run T1170_getobject T1170_javascript T1170_vbscript T1170_vbscript T1170_http OriginalFileName ImageFileName Commands ParentImage ParentCommandLine
+| sort Score desc

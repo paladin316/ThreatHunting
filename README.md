@@ -124,5 +124,5 @@ Base score + Each MITRE Technique Score X The number of occurences for each even
    
     **Description**: Splunk query designed to identify indicators that are prelude to a possible Silver Ticket attack
    
-   Examples:
-   ![image](https://user-images.githubusercontent.com/15706462/158032291-1ee06f71-7ab1-4994-be57-b116a55e947f.png)
+    Examples:
+    ![image](https://user-images.githubusercontent.com/15706462/158032291-1ee06f71-7ab1-4994-be57-b116a55e947f.png)

@@ -1,0 +1,13 @@
+host=* "reg" AND CommandLine="*hklm\\system\ *" OR CommandLine="*hklm\\sam\ *" OR CommandLine="*hklm\\security\ *"
+| eval Time=strftime(_time, "%m/%d/%Y %H:%M:%S")
+| stats values(ComputerName) AS Computers values(User) AS User values(IntegrityLevel) AS IntegrityLevel values(OriginalFileName) AS OriginalFileName  values(Image) AS ImageFileName values(CommandLine) AS CommandLine values(ParentImage) As ParentImage values(ParentCommandLine) AS ParentCommandLine dc(CommandLine) AS ThreatCount by Image,ComputerName
+| eval Commands = lower(CommandLine)
+| rex field=Commands mode=sed "s/\"//g"
+| eval T1212_system=if(match((Commands),"(?i).*system.*"),10,0)
+| eval T1212_sam=if(match((Commands),"(?i).*sam.*"),10,0)
+| eval T1212_security=if(match((Commands),"(?i).*security.*"),10,0)
+| eval CredentialAccess_c= 'T1212_system'+'T1212_sam'+'T1212_security'
+| eval CredentialAccess=CredentialAccess_c*ThreatCount
+| addtotals fieldname=Score CredentialAccess
+| table Computers User IntegrityLevel Score CredentialAccess T1212_system T1212_sam T1212_security OriginalFileName ImageFileName Commands ParentImage ParentCommandLine
+| sort Score desc

@@ -1,0 +1,14 @@
+host=* "net" CommandLine="*\/add*"
+| eval Date=strftime(_time, "%Y/%m/%d %H:%M:%S:%f")
+| stats values(ComputerName) AS Computers values(User) AS User values(IntegrityLevel) AS IntegrityLevel values(OriginalFileName) AS OriginalFileName  values(Image) AS ImageFileName values(CommandLine) AS CommandLine values(ParentImage) As ParentImage values(ParentCommandLine) AS ParentCommandLine dc(CommandLine) AS ThreatCount by Image,ComputerName
+| eval Commands = lower(CommandLine)
+| rex field=Commands mode=sed "s/\"//g"
+| eval T1136_net=if(match((Commands),"(?i).*net.*(user|localgroup|accounts).*\/add"),7,0)
+| eval T1136_localgroup=if(match((Commands),"(?i).*localgroup.*"),10,0)
+| eval T1136_administrators=if(match((Commands),"(?i).*administrators.*"),10,0)
+| eval T1136_user=if(match((Commands),"(?i).*user.*"),10,0)
+| eval T1136_add=if(match((Commands),"(?i).*add.*"),4,0)
+| eval Persistence_c= 'T1136_net'+'T1136_localgroup'+'T1136_administrators'+'T1136_user'+'T1136_add'
+| eval Persistence=Persistence_c*ThreatCount
+| addtotals fieldname=Score Persistence
+| table Computers User IntegrityLevel Score Persistence T1136_net T1136_localgroup T1136_administrators T1136_user T1136_add OriginalFileName ImageFileName Commands ParentImage ParentCommandLine

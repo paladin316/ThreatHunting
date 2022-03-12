@@ -97,5 +97,11 @@ Base score + Each MITRE Technique Score X The number of occurences for each even
    [Example_Data-splunk_sysmon_malicious_powershell_hunt.csv](https://github.com/paladin316/ThreatHunting/files/7737856/Example_Data-splunk_sysmon_malicious_powershell_hunt.csv)
    
 
+7. **Filename**: splunk_sysmon_T1098_net_user_add.txt
+   
+   **Description**: Splunk query designed to identify "net user /add" activity
+
+   Examples:
+   ![image](https://user-images.githubusercontent.com/15706462/158027852-a518ced6-654b-425a-8f33-60420d818d3a.png)
 
 

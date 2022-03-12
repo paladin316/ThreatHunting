@@ -103,5 +103,20 @@ Base score + Each MITRE Technique Score X The number of occurences for each even
 
    Examples:
    ![image](https://user-images.githubusercontent.com/15706462/158027852-a518ced6-654b-425a-8f33-60420d818d3a.png)
+   
 
+8. **Filename**: splunk_sysmon_T1170_mshta.txt
+   
+   **Description**: Splunk query designed to identify MSHTA activity using protocol handlers
+
+   Examples:
+   ![image](https://user-images.githubusercontent.com/15706462/158031914-489d4a56-2621-4a06-98de-170149f2272b.png)
+
+   
+9. **Filename**: splunk_sysmon_T1098_net_user_add.txt
+   
+   **Description**: Splunk query designed to identify MSHTA activity using protocol handlers and assoicated network activity indicators
+   
+   Examples:
+   ![image](https://user-images.githubusercontent.com/15706462/158031927-689a09b0-69da-426b-a829-450266770de8.png)
 

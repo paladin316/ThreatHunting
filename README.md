@@ -134,3 +134,9 @@ Base score + Each MITRE Technique Score X The number of occurences for each even
     Examples:
     ![image](https://user-images.githubusercontent.com/15706462/158065732-2bb71f3f-0190-465b-9cbe-f801d30e9a58.png)
 
+12. **Filename**: splunk_sysmon_T1003.003_ntda.dit.txt
+   
+    **Description**: Splunk query designed to credential dumping via ntds.dit with command execution to copy/save credential information
+   
+    Examples:
+    ![image](https://user-images.githubusercontent.com/15706462/158066276-d5b0ddfb-a805-48fb-9f5f-e6273f2b4620.png)

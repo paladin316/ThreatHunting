@@ -126,3 +126,11 @@ Base score + Each MITRE Technique Score X The number of occurences for each even
    
     Examples:
     ![image](https://user-images.githubusercontent.com/15706462/158032291-1ee06f71-7ab1-4994-be57-b116a55e947f.png)
+
+11. **Filename**: splunk_sysmon_T1218.013_mavinject.txt
+   
+    **Description**: Splunk query designed to identify mavinject activity
+   
+    Examples:
+    ![image](https://user-images.githubusercontent.com/15706462/158065732-2bb71f3f-0190-465b-9cbe-f801d30e9a58.png)
+

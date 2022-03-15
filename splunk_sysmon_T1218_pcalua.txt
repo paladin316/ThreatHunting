@@ -1,0 +1,11 @@
+host=* "Pcalua.exe" AND CommandLine="*\-a*"
+| eval Time=strftime(_time, "%Y/%m/%d %H:%M:%S")
+| stats values(Time) AS Time values(ComputerName) AS Computers values(User) AS User values(ProcessId) AS ProcessId values(ParentProcessId) AS ParentProcessId values(IntegrityLevel) AS IntegrityLevel values(OriginalFileName) AS OriginalFileName values(Image) AS ImageFileName values(CommandLine) AS CommandLine values(ParentImage) As ParentImage values(ParentCommandLine) AS ParentCommandLine dc(CommandLine) AS ThreatCount by Image,ComputerName
+| eval Commands = lower(CommandLine)
+| rex field=Commands mode=sed "s/\"//g"
+| eval T1218_pcalua=if(match((Commands),"(?i).*pcalua.*-a.*\.exe|(?i).*pcalua.*-a.*\.dll|(?i).*pcalua.*-a.*\.cpl"),7,0)
+| eval Execution_c= 'T1218_pcalua'
+| eval  Execution=Execution_c*ThreatCount
+| addtotals fieldname=Score Execution
+| table Time Computers User ProcessId ParentProcessId IntegrityLevel Score Execution T1218_pcalua OriginalFileName ImageFileName Commands ParentImage ParentCommandLine
+| sort Score desc

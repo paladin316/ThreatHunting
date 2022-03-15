@@ -1,0 +1,13 @@
+host=* "Findstr" AND (CommandLine="*password*" OR CommandLine="*admin*")
+| eval Time=strftime(_time, "%Y/%m/%d %H:%M:%S")
+| stats values(Time) AS Time values(ComputerName) AS Computers values(User) AS User values(ProcessId) AS ProcessId values(ParentProcessId) AS ParentProcessId values(IntegrityLevel) AS IntegrityLevel values(OriginalFileName) AS OriginalFileName values(Image) AS ImageFileName values(CommandLine) AS CommandLine values(ParentImage) As ParentImage values(ParentCommandLine) AS ParentCommandLine dc(CommandLine) AS ThreatCount by Image,ComputerName
+| eval Commands = lower(CommandLine)
+| rex field=Commands mode=sed "s/\"//g"
+| eval T1034_Findstr=if(match((Commands),"(?i).*Findstr.*"),10,0)
+| eval T1034_Password=if(match((Commands),"(?i).*password.*"),10,0)
+| eval T1034_Admin=if(match((Commands),"(?i).*admin.*"),10,0)
+| eval Persistence_c= 'T1034_Findstr'+'T1034_Password'
+| eval  Persistence=Persistence_c*ThreatCount
+| addtotals fieldname=Score Persistence
+| table Time Computers User ProcessId ParentProcessId IntegrityLevel Score Lateral_Movement T1034_Findstr T1034_Password T1034_Admin OriginalFileName ImageFileName Commands ParentImage ParentCommandLine
+| sort Score desc

@@ -1,0 +1,15 @@
+host=* (("query.exe" AND CommandLine="*session*") OR ("sc.exe" AND CommandLine="*binpath*") OR ("net.exe" AND CommandLine="*start*"))
+| eval Time=strftime(_time, "%Y/%m/%d %H:%M:%S")
+| stats values(Time) AS Time values(ComputerName) AS Computers values(User) AS User values(ProcessId) AS ProcessId values(ParentProcessId) AS ParentProcessId values(IntegrityLevel) AS IntegrityLevel values(OriginalFileName) AS OriginalFileName values(Image) AS ImageFileName values(CommandLine) AS CommandLine values(ParentImage) As ParentImage values(ParentCommandLine) AS ParentCommandLine dc(CommandLine) AS ThreatCount by Image,ComputerName
+| eval Commands = lower(CommandLine)
+| rex field=Commands mode=sed "s/\"//g"
+| eval T1076_session=if(match((Commands),"(?i).*query.*session.*"),10,0) 
+| eval T1076_create=if(match((Commands),"(?i).*create*"),10,0)
+| eval T1076_start=if(match((Commands),"(?i).*start.*"),10,0)
+| eval T1076_binpath=if(match((Commands),"(?i).*binpath\=.*"),10,0)
+| eval T1076_cmd=if(match((Commands),"(?i).*cmd\.exe.*"),10,0)
+| eval Lateral_Movement_c= 'T1076_session'+'T1076_create'+'T1076_start'+'T1076_binpath'+'T1076_cmd'
+| eval  Lateral_Movement=Lateral_Movement_c*ThreatCount
+| addtotals fieldname=Score Lateral_Movement
+| table Time Computers User ProcessId ParentProcessId IntegrityLevel Score Lateral_Movement T1076_session T1076_create T1076_start T1076_binpath T1076_cmd OriginalFileName ImageFileName Commands ParentImage ParentCommandLine
+| sort Score desc

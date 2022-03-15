@@ -1,0 +1,12 @@
+event_platform="Win" (event_simpleName=ProcessBlocked OR event_simpleName=ProcessRollup2)	
+(FileName="Bitsadmin.exe" AND (CommandLine="*\/create*" OR CommandLine="*\/addfile*" OR CommandLine="*\/resume*" OR CommandLine="*\/SetNotifyCmdLine*" OR CommandLine="*http*"))
+| eval Time=strftime(_time, "%m/%d/%Y %H:%M:%S")
+| stats values(Time) AS Time values(ComputerName) AS Computers values(UserName) AS UserName values(DetectScenario) AS DetectScenario values(event_simpleName) AS event_simpleName  values(FileName) AS FileName values(ImageFileName) AS ImageFileName values(ParentImageFileName) AS ParentImageFileName values(CommandLine) AS CommandLine values(CommandHistory) AS CommandHistory2 values(RegObjectName) AS RegObjectName values(RegStringValue) AS RegStringValue values(RegValueName) AS RegValueName values(CallStackModuleNames) AS CSMN dc(ComputerName) AS CompNumber dc(CommandLine) AS ThreatCount by aid
+| eval Commands = lower(CommandLine)
+| rex field=Commands mode=sed "s/\"//g"
+| eval T1197_bitsadmin=if(match((Commands),"(?i).*bitsadmin.*(SetNotifyCmdLine|addfile|create|Reset|RESUME|Complete).*"),10,0)
+| eval Persistence_c= 'T1197_bitsadmin'
+| eval  Persistence=Persistence_c*ThreatCount
+| addtotals fieldname=Score Persistence
+| table Time Computers UserName DetectScenario event_simpleName Score ThreatCount Persistence FileName ImageFileName Commands T1197_bitsadmin  CSMN
+| sort Score desc

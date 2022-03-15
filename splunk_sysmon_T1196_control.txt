@@ -1,0 +1,10 @@
+host=* "Control.exe" 
+| eval Time=strftime(_time, "%Y/%m/%d %H:%M:%S")
+| stats values(Time) AS Time values(ComputerName) AS Computers values(User) AS User values(ProcessId) AS ProcessId values(ParentProcessId) AS ParentProcessId values(IntegrityLevel) AS IntegrityLevel values(OriginalFileName) AS OriginalFileName values(Image) AS ImageFileName values(CommandLine) AS CommandLine values(ParentImage) As ParentImage values(ParentCommandLine) AS ParentCommandLine dc(CommandLine) AS ThreatCount by Image,ComputerName
+| eval Commands = lower(CommandLine)
+| rex field=Commands mode=sed "s/\"//g"
+| eval T1196_control=if(match((Commands),"(?i).*control.*(\.\w{3})"),7,0)
+| eval Defense_Evasion= 'T1196_control'
+| addtotals fieldname=Score Defense_Evasion
+| table Time Computers User ProcessId ParentProcessId IntegrityLevel Score Defense_Evasion T1015_ATBroker OriginalFileName ImageFileName Commands ParentImage ParentCommandLine
+| sort Score desc

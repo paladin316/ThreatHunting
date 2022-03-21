@@ -1,0 +1,68 @@
+host=* "schtasks" OR "net" OR "reg" OR "powershell" OR  "netsh"  OR  "wmic" OR "esentutl" OR "ntds" OR  "comsvcs" OR "dcsync" OR "nltest" OR "AnyDesk" OR "Filezilla" OR "adfind" OR "PsExec" OR "curl" OR "Msbuild"
+| eval Time=strftime(_time, "%Y/%m/%d %H:%M:%S") 
+| stats values(Time) AS Time values(ComputerName) AS Computers values(User) AS User values(ProcessId) AS ProcessId values(IntegrityLevel) AS IntegrityLevel values(OriginalFileName) AS OriginalFileName values(Image) AS ImageFileName values(CommandLine) AS CommandLine values(ParentImage) As ParentImage values(ParentCommandLine) AS ParentCommandLine dc(CommandLine) AS ThreatCount by ComputerName,Image
+| eval Commands = lower(CommandLine) 
+| rex field=Commands mode=sed "s/\"//g" 
+| eval T1053_schtasks=if(match((Commands),"(?i).*schtasks.*delete.*\/TN|(?i).*schtasks.*\/(create|sc|tn|run).*"),7,0)
+| eval T1136_net=if(match((Commands),"(?i).*net.*(user|localgroup|accounts).*\/add"),7,0)
+| eval T1087_net=if(match((Commands),"(?i).*net.*(\ user|\ group|\ localgroup)"),1,0)
+| eval T1096_reg=if(match(lower(Commands),"(?i).*reg.*export.*:.*\w{3}|(?i).*reg.*add.*(\/d|cmd.exe).*|.*reg.*(UserAuthentication|fDenyTSConnections).*|.*reg.*save.*|.*reg.*add.*|.*reg.*import.*"),4,0)
+| eval T1562_004_mod_fw=if(match((Commands),"(?i).*NetSh.*(Advfirewall|set|off|enable|disable).*"),10,0) 
+| eval T1562_004_pwrshell_mod_fw=if(match((Commands),"(?i).*New\-NetFirewallRule.*"),10,0) 
+| eval T1003_003_cred_dump_wmic=if(match((Commands),"(?i).*wmic.*(\/user|\/domain|\/admin|vssadmin|shadow|create|call|copy|NTDS|system|security).*"),10,0) 
+| eval T1096_esentutl=if(match((Commands),"(?i).*esentutl.*(\/y|\/d|\/o|:|ntds).*"),7,0)
+| eval T1003_ntds=if(match((Commands),"(?i).*ntds.*"),10,0)
+| eval T1003_creds=if(match((Commands),"(?i).*reg.*(sam|security|system).*"),10,0)
+| eval T1003_001_cred_dump_lsass=if(match((Commands),"(?i).*rundll32.*(comsvcs).*|.*wmic.*(comsvcs).*|.*(privilege::debug|sekurlsa|logonpasswords).*"),10,0)
+| eval T1003_006_cred_dump_dcsync=if(match((Commands),"(?i).*dcsync.*"),10,0)
+| eval T1059_001_susp_pwrshell=if(match((Commands),"(?i).*(powershell-import|Get-DomainController|Get-DomainComputer|get-adcomputer|Get-NetSubnet|Invoke-UserHunter|Invoke-ShareFinder|Set\-ItemProperty).*"),10,0) 
+| eval T1137_nltest=if(match((Commands),"(?i).*nltest.*"),4,0)
+| eval T1135_net=if(match((Commands),"(?i).*net.*(session|share|use|view)"),7,0)
+| eval T1087_net=if(match((Commands),"(?i).*net.*(\ user|\ group|\ localgroup|Enterprise\ Admins|Domain\ Admins)"),10,0)
+| eval T1219_anydesk=if(match((Commands),"(?i).*AnyDesk.*"),10,0)
+| eval T1072_002_Filezilla=if(match((Commands),"(?i).*Filezilla.*"),4,0)
+| eval T1018_adfind=if(match((Commands),"(?i).*adfind.*"),10,0)
+| eval T1021_002_psexec=if(match((Commands),"(?i).*PsExec.*"),10,0)
+| eval T1105_curl=if(match((Commands),"(?i).*curl.*"),4,0)
+| eval T1127_msbuild=if(match((CommandLine),"(?i)Msbuild.exe"),10,0)
+
+| eval Initial_Access_c=0
+
+| eval Execution_c= 'T1053_schtasks'+'T1072_002_Filezilla'+'T1059_001_susp_pwrshell'
+
+| eval Persistence_c= 'T1136_net'
+
+| eval Privilege_Escalation_c=0
+
+| eval Defense_Evasion_c= 'T1096_esentutl'+'T1096_reg'+'T1127_msbuild'+'T1562_004_mod_fw'+'T1562_004_pwrshell_mod_fw'
+
+| eval Credential_Access_c= 'T1003_003_cred_dump_wmic'+'T1003_ntds'+'T1003_creds'+'T1003_001_cred_dump_lsass'+'T1003_006_cred_dump_dcsync'
+
+| eval Discovery_c= 'T1137_nltest'+'T1018_adfind'+'T1135_net'+'T1087_net'
+
+| eval Lateral_Movement_c= 'T1105_curl'+'T1021_002_psexec'
+
+| eval Collection_c=0
+
+| eval Exfiltration_c=0
+
+| eval C2_c= 'T1219_anydesk'
+
+| eval AWL_bypass_c=0
+
+| eval  Initial_Access=Initial_Access_c*ThreatCount
+| eval  Execution=Execution_c*ThreatCount
+| eval  Persistence=Persistence_c*ThreatCount
+| eval  Privilege_Escalation=Privilege_Escalation_c*ThreatCount
+| eval  Defense_Evasion=Defense_Evasion_c*ThreatCount
+| eval  Credential_Access=Credential_Access_c*ThreatCount
+| eval  Discovery=Discovery_c*ThreatCount
+| eval  Lateral_Movement=Lateral_Movement_c*ThreatCount
+| eval  Collection=Collection_c*ThreatCount
+| eval  Exfiltration=Exfiltration_c*ThreatCount
+| eval  C2=C2_c*ThreatCount
+| eval  AWL_bypass=AWL_bypass_c*ThreatCount
+| addtotals fieldname=Score Initial_Access Execution Persistence Privilege_Escalation Defense_Evasion Credential_Access Discovery Lateral_Movement Collection Exfiltration C2 AWL_bypass
+| table Score Computers User IntegrityLevel Initial_Access Execution Persistence Privilege_Escalation Defense_Evasion Credential_Access Discovery Lateral_Movement Collection Exfiltration C2 AWL_bypass OriginalFileName ImageFileName Commands ParentImage ParentCommandLine T1053_schtasks T1136_net T1087_net T1096_reg T1562_004_mod_fw T1562_004_pwrshell_mod_fw T1003_003_cred_dump_wmic T1096_esentutl T1003_ntds T1212_creds T1003_001_cred_dump_lsas T1003_006_cred_dump_dcsync T1059_001_susp_pwrshell T1137_nltest T1135_net T1087_net T1219_anydesk T1072_002_Filezilla T1018_adfind T1021_002_psexec T1105_curl T1127_msbuild
+| where Score > 0
+| sort Score desc
